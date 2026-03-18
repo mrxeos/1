@@ -132,6 +132,7 @@ const AccountsView: React.FC = () => {
                         <select name="role" value={formData.role} onChange={handleInputChange} className="input">
                             <option value="Doctor">طبيب</option>
                             <option value="Assistant">مساعد</option>
+                            <option value="Display">شاشة عرض</option>
                         </select>
                         <div className="md:col-span-3 flex justify-end">
                             <button type="submit" className="btn btn-accent">
@@ -159,8 +160,14 @@ const AccountsView: React.FC = () => {
                             >
                                 <td className="table-cell font-medium">{user.username}</td>
                                 <td className="table-cell">
-                                    <span className={`user-role-tag ${user.role === 'Doctor' ? 'is-doctor' : 'is-assistant'}`}>
-                                        {user.role === 'Doctor' ? 'طبيب' : 'مساعد'}
+                                    <span className={`user-role-tag ${
+                                        user.role === 'Doctor' ? 'is-doctor' : 
+                                        user.role === 'Assistant' ? 'is-assistant' : 
+                                        'is-display'
+                                    }`}>
+                                        {user.role === 'Doctor' ? 'طبيب' : 
+                                         user.role === 'Assistant' ? 'مساعد' : 
+                                         'شاشة عرض'}
                                     </span>
                                 </td>
                                 <td className="table-cell whitespace-nowrap">

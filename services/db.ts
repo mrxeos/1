@@ -150,6 +150,10 @@ export const addToWaitingList = async (item: Omit<WaitingListItem, 'id' | 'added
 export const removeFromWaitingList = (id: number): Promise<void> => apiFetch(`/waiting-list/${id}`, {
     method: 'DELETE',
 });
+export const toggleEmergency = (id: number, isEmergency: boolean): Promise<void> => apiFetch(`/waiting-list/${id}/emergency`, {
+    method: 'PUT',
+    body: JSON.stringify({ isEmergency }),
+});
 
 // --- Symptoms ---
 export const getAllSymptoms = (): Promise<Symptom[]> => apiFetch('/symptoms');

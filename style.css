@@ -330,6 +330,8 @@ body {
 .btn-success:hover { background-color: var(--success-focus); }
 .btn-danger { background-color: var(--danger); color: #fff; }
 .btn-danger:hover { background-color: var(--danger-focus); }
+.btn-warning { background-color: #f59e0b; color: #fff; }
+.btn-warning:hover { background-color: #d97706; }
 .btn-light { background-color: var(--surface-alt); color: var(--text-primary); border-color: var(--border); }
 .btn-light:hover { background-color: var(--border); }
 .btn-sm { padding: 0.25rem 0.75rem; font-size: 0.875rem; }
@@ -517,7 +519,22 @@ textarea.input { min-height: 80px; }
 .waiting-list-count { font-size: 1.125rem; font-weight: 600; background-color: var(--primary); color: var(--primary-content); padding: 0.25rem 1rem; border-radius: 9999px; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
 .waiting-list-item { background-color: var(--surface-alt); padding: 1rem; border-radius: var(--border-radius); display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); border: 1px solid transparent; transition: border-color 0.3s; }
 .waiting-list-item:hover { border-color: var(--primary); }
+.waiting-list-item.is-emergency { border-color: var(--danger); background-color: var(--danger-content); }
 .waiting-list-number { flex-shrink: 0; width: 3rem; height: 3rem; display: flex; align-items: center; justify-content: center; background-color: var(--primary); color: var(--primary-content); border-radius: 9999px; font-size: 1.5rem; font-weight: 700; }
+.bg-danger { background-color: var(--danger) !important; }
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 0.25rem;
+    line-height: 1;
+}
+.badge-danger {
+    background-color: var(--danger);
+    color: var(--danger-content);
+}
 
 /* Reports */
 .report-container { padding: 1rem; border: 1px solid var(--border); border-radius: var(--border-radius); background-color: var(--surface-alt); }
@@ -736,4 +753,236 @@ textarea.input { min-height: 80px; }
     background-color: rgba(var(--text-secondary-rgb, 75, 85, 99), 0.1);
     color: var(--text-secondary);
     border: 1px solid rgba(var(--text-secondary-rgb, 75, 85, 99), 0.2);
+}
+
+.user-role-tag.is-display {
+    background-color: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary);
+    border: 1px solid rgba(var(--primary-rgb), 0.2);
+}
+
+/* Waiting List Display Mode */
+.display-mode {
+    background-color: #000;
+}
+
+.full-width {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+}
+
+.waiting-list-display-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #111;
+    color: #fff;
+    padding: 2rem;
+    overflow: hidden;
+    direction: rtl;
+}
+
+.display-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 1rem;
+}
+
+.display-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin: 0;
+}
+
+.display-stats {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.count-badge {
+    background-color: var(--primary);
+    color: #fff;
+    padding: 0.5rem 2rem;
+    border-radius: 9999px;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.time-badge {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.display-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.display-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.display-item {
+    background-color: #222;
+    border: 2px solid #333;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.3s;
+}
+
+.display-item.next-patient {
+    border-color: var(--success);
+    background-color: #1a2e1a;
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(var(--success-rgb), 0.2);
+    position: relative;
+}
+
+.display-item.is-emergency {
+    border-color: var(--danger);
+    background-color: #2e1a1a;
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(var(--danger-rgb), 0.2);
+    position: relative;
+    border-width: 4px;
+}
+
+.item-number {
+    width: 4rem;
+    height: 4rem;
+    background-color: #333;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.next-patient .item-number {
+    background-color: var(--success);
+}
+
+.is-emergency .item-number {
+    background-color: var(--danger);
+}
+
+.item-info {
+    flex: 1;
+}
+
+.patient-name {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin: 0;
+    color: #fff;
+}
+
+.file-number {
+    font-size: 1.25rem;
+    color: #aaa;
+    margin: 0.25rem 0 0 0;
+}
+
+.next-label {
+    position: absolute;
+    top: -1rem;
+    left: 2rem;
+    background-color: var(--success);
+    color: #fff;
+    padding: 0.25rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.display-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    color: #666;
+}
+
+.display-empty .icon-wrapper {
+    width: 10rem;
+    height: 10rem;
+    margin-bottom: 2rem;
+    opacity: 0.2;
+}
+
+.display-empty p {
+    font-size: 2.5rem;
+}
+
+.display-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.spinner {
+    width: 5rem;
+    height: 5rem;
+    border: 5px solid #333;
+    border-top: 5px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 2rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.display-footer {
+    margin-top: 2rem;
+    text-align: center;
+    padding: 1rem;
+    border-top: 1px solid #333;
+    color: #666;
+    font-size: 1.5rem;
+}
+
+.display-logout-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 100;
+    font-weight: 600;
+}
+
+.display-logout-btn:hover {
+    background-color: var(--danger);
+    border-color: var(--danger);
 }

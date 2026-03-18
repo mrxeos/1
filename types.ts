@@ -78,6 +78,7 @@ export interface WaitingListItem {
   patientName: string;
   patientFileNumber: number;
   addedAt: number;
+  isEmergency?: boolean;
 }
 
 export type ExpenseCategory = 'ايجار' | 'مرتبات الموظفين' | 'الفواتير' | 'اخرى';
@@ -90,7 +91,7 @@ export interface Expense {
   amount: number;
 }
 
-export type Role = 'Doctor' | 'Assistant';
+export type Role = 'Doctor' | 'Assistant' | 'Display';
 
 export interface User {
   id: number;

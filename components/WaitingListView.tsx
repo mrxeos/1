@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { WaitingListItem, Patient, User } from '../types';
-import { getWaitingList, removeFromWaitingList, addToWaitingList, getAllPatients } from '../services/db';
+import { getWaitingList, removeFromWaitingList, addToWaitingList, getAllPatients, toggleEmergency } from '../services/db';
 import { PlusIcon, TrashIcon, PatientIcon, UserIcon, CheckIcon, XIcon } from './icons';
 import { View } from '../types';
 
@@ -28,9 +28,22 @@ const WaitingListView: React.FC<WaitingListViewProps> = ({ user, setActiveView, 
                 getWaitingList(),
                 getAllPatients()
             ]);
-            // Sort by addedAt ascending (priority of addition)
-            const sortedList = [...list].sort((a, b) => a.addedAt - b.addedAt);
-            setWaitingList(sortedList);
+            
+            // Calculate original numbers based on addedAt time
+            const sortedByTime = [...list].sort((a, b) => a.addedAt - b.addedAt);
+            const listWithOriginalNumbers = list.map(item => {
+                const originalIndex = sortedByTime.findIndex(i => i.id === item.id);
+                return { ...item, originalNumber: originalIndex + 1 };
+            });
+
+            // Sort for display: Emergency first, then by original number
+            const sortedList = listWithOriginalNumbers.sort((a, b) => {
+                if (a.isEmergency && !b.isEmergency) return -1;
+                if (!a.isEmergency && b.isEmergency) return 1;
+                return a.addedAt - b.addedAt;
+            });
+            
+            setWaitingList(sortedList as any);
             setPatients(allPatients);
         } catch (error) {
             console.error('Error fetching waiting list data:', error);
@@ -72,6 +85,15 @@ const WaitingListView: React.FC<WaitingListViewProps> = ({ user, setActiveView, 
             await fetchData();
         } catch (error) {
             console.error('Error removing from waiting list:', error);
+        }
+    };
+
+    const handleToggleEmergency = async (id: number, currentStatus: boolean) => {
+        try {
+            await toggleEmergency(id, !currentStatus);
+            await fetchData();
+        } catch (error) {
+            console.error('Error toggling emergency status:', error);
         }
     };
 
@@ -141,14 +163,17 @@ const WaitingListView: React.FC<WaitingListViewProps> = ({ user, setActiveView, 
                     </div>
                 ) : waitingList.length > 0 ? (
                     <div className="flex flex-col gap-3 p-2 max-w-4xl mx-auto">
-                        {waitingList.map((item, index) => (
-                            <div key={item.id} className="waiting-list-item animate-fade-in-down">
+                        {waitingList.map((item: any, index) => (
+                            <div key={item.id} className={`waiting-list-item animate-fade-in-down ${item.isEmergency ? 'is-emergency' : ''}`}>
                                 <div className="flex items-center gap-4">
-                                    <div className="waiting-list-number">
-                                        {index + 1}
+                                    <div className={`waiting-list-number ${item.isEmergency ? 'bg-danger text-white' : ''}`}>
+                                        {item.originalNumber || index + 1}
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-lg">{item.patientName}</h3>
+                                        <h3 className={`font-bold text-lg ${item.isEmergency ? 'text-danger' : ''}`}>
+                                            {item.patientName}
+                                            {item.isEmergency && <span className="ms-2 badge badge-danger">حالة طارئة</span>}
+                                        </h3>
                                         <p className="text-secondary text-sm">رقم الملف: {item.patientFileNumber}</p>
                                         <p className="text-xs opacity-50 mt-1">
                                             تمت الإضافة: {new Date(item.addedAt).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
@@ -156,6 +181,20 @@ const WaitingListView: React.FC<WaitingListViewProps> = ({ user, setActiveView, 
                                     </div>
                                 </div>
                                 <div className="flex gap-2">
+                                    {user.role === 'Doctor' && (
+                                        <button 
+                                            onClick={() => handleToggleEmergency(item.id!, !!item.isEmergency)}
+                                            className={`btn btn-sm ${item.isEmergency ? 'btn-light' : 'btn-warning'} flex items-center gap-1`}
+                                            title={item.isEmergency ? 'إلغاء الحالة الطارئة' : 'تحديد كحالة طارئة'}
+                                        >
+                                            <span className="icon-wrapper icon-xs">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                </svg>
+                                            </span>
+                                            {item.isEmergency ? 'إلغاء الطوارئ' : 'حالة طارئة'}
+                                        </button>
+                                    )}
                                     <button 
                                         onClick={() => handleRemoveFromWaitingList(item.id!)}
                                         className="btn btn-sm btn-success flex items-center gap-1"

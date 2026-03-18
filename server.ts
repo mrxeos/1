@@ -87,6 +87,7 @@ db.exec(`
     patientName TEXT,
     patientFileNumber INTEGER,
     addedAt INTEGER,
+    isEmergency INTEGER DEFAULT 0,
     FOREIGN KEY (patientId) REFERENCES patients (id)
   );
 
@@ -113,11 +114,24 @@ db.exec(`
   );
 `);
 
+// Migrations
+try {
+  db.prepare('ALTER TABLE waitingList ADD COLUMN isEmergency INTEGER DEFAULT 0').run();
+} catch (e) {
+  // Column already exists
+}
+
 // Seed default users if empty
 const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
 if (userCount.count === 0) {
   db.prepare('INSERT INTO users (username, password, role) VALUES (?, ?, ?)').run('doctor', 'password', 'Doctor');
   db.prepare('INSERT INTO users (username, password, role) VALUES (?, ?, ?)').run('assistant', 'password', 'Assistant');
+}
+
+// Ensure display user exists
+const displayUser = db.prepare('SELECT id FROM users WHERE username = ?').get('display');
+if (!displayUser) {
+  db.prepare('INSERT INTO users (username, password, role) VALUES (?, ?, ?)').run('display', 'password', 'Display');
 }
 
 // Seed medicines if empty
@@ -370,15 +384,26 @@ app.get('/api/expenses/month', (req, res) => {
 
   // Waiting List
   app.get('/api/waiting-list', (req, res) => {
-    const list = db.prepare('SELECT * FROM waitingList ORDER BY addedAt ASC').all();
-    res.json(list);
+    const list = db.prepare('SELECT * FROM waitingList ORDER BY isEmergency DESC, addedAt ASC').all();
+    // Convert isEmergency from 0/1 to boolean
+    const formattedList = list.map((item: any) => ({
+      ...item,
+      isEmergency: !!item.isEmergency
+    }));
+    res.json(formattedList);
   });
 
   app.post('/api/waiting-list', (req, res) => {
-    const { patientId, patientName, patientFileNumber } = req.body;
+    const { patientId, patientName, patientFileNumber, isEmergency } = req.body;
     const addedAt = Date.now();
-    const result = db.prepare('INSERT INTO waitingList (patientId, patientName, patientFileNumber, addedAt) VALUES (?, ?, ?, ?)').run(patientId, patientName, patientFileNumber, addedAt);
+    const result = db.prepare('INSERT INTO waitingList (patientId, patientName, patientFileNumber, addedAt, isEmergency) VALUES (?, ?, ?, ?, ?)').run(patientId, patientName, patientFileNumber, addedAt, isEmergency ? 1 : 0);
     res.json({ id: result.lastInsertRowid, addedAt });
+  });
+
+  app.put('/api/waiting-list/:id/emergency', (req, res) => {
+    const { isEmergency } = req.body;
+    db.prepare('UPDATE waitingList SET isEmergency = ? WHERE id = ?').run(isEmergency ? 1 : 0, req.params.id);
+    res.json({ success: true });
   });
 
   app.delete('/api/waiting-list/:id', (req, res) => {
